@@ -5,6 +5,7 @@ namespace ShaderNightVision
         Mono,
         Double,
         Quad
+        // TODO: add Fullscreen
             
     }
 }

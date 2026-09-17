@@ -1,4 +1,6 @@
 using JetBrains.Annotations;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using UnityEngine;
@@ -62,9 +64,11 @@ namespace ShaderNightVision
             return loadedAssetBundle;
             
         }
+
+        private static Dictionary<string, Object> cachedAssets = new Dictionary<string, Object>();
         
         [CanBeNull]
-        public static T LoadAsset<T>(string assetName)  where T : Object
+        public static T GetAsset<T>(string assetName)  where T : Object
         {
             if (assetBundle == null)
             {
@@ -72,15 +76,28 @@ namespace ShaderNightVision
                 return null;
             }
             
-            T asset = assetBundle.LoadAsset<T>(assetName);
+            T asset;
 
+            if (cachedAssets.TryGetValue(assetName, out Object cachedAsset))
+            {
+                Plugin.Logger.LogError($"Asset \"{assetName}\" found in cache");
+                asset = (T)cachedAsset;
+                
+            }
+            else
+            { 
+                asset = assetBundle.LoadAsset<T>(assetName);
+                cachedAssets.Add(assetName, asset);
+                Plugin.Logger.LogError($"Asset \"{assetName}\" cached");
+            }
+            
             if (asset == null)
             {
                 Plugin.Logger.LogError($"Asset \"{assetName}\" not found");
                 return null;
             }
 
-            Plugin.Logger.LogInfo($"Asset \"{assetName}\" loaded");
+            Plugin.Logger.LogInfo($"Asset \"{assetName}\" found");
             
             return asset;
         }

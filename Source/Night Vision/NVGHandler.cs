@@ -37,16 +37,16 @@ namespace ShaderNightVision
             switch (PluginConfig.currentProfile.tubeType.Value)
             {
                 case NVTubeType.Mono:
-                    NVGGameObject = GameObject.Instantiate(AssetBundleUtil.LoadAsset<GameObject>("NVG1M"));
+                    NVGGameObject = GameObject.Instantiate(AssetBundleUtil.GetAsset<GameObject>("NVG1M"));
                     break;
                 case NVTubeType.Double:
-                    NVGGameObject = GameObject.Instantiate(AssetBundleUtil.LoadAsset<GameObject>("NVG1"));
+                    NVGGameObject = GameObject.Instantiate(AssetBundleUtil.GetAsset<GameObject>("NVG1"));
                     break;
                 case NVTubeType.Quad:
-                    NVGGameObject = GameObject.Instantiate(AssetBundleUtil.LoadAsset<GameObject>("NVG3"));
+                    NVGGameObject = GameObject.Instantiate(AssetBundleUtil.GetAsset<GameObject>("NVG3"));
                     break;
                 default:
-                    NVGGameObject = GameObject.Instantiate(AssetBundleUtil.LoadAsset<GameObject>("NVG1"));
+                    NVGGameObject = GameObject.Instantiate(AssetBundleUtil.GetAsset<GameObject>("NVG1"));
                     break;
             }
             Plugin.Logger.LogInfo(HUD is null); 
