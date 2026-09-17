@@ -32,30 +32,14 @@ namespace ShaderNightVision
             
             
             
-            // if (tubeType is null)
-            // {
-                profileName = "Global Profile";    
-            // }
-            // else
-            // {
-            //     switch (tubeType)
-            //     {
-            //         case NVTubeType.Mono:
-            //             profileName = "1st Generation";
-            //             break;
-            //         case NVTubeType.Double:
-            //             profileName = "2nd Generation";
-            //             break;
-            //         case NVTubeType.Quad:
-            //             profileName = "3rd Generation";
-            //             break;
-            //     }
-            // }
+            
+                profileName = "UI";    
+           
             
             tubeType = config.Bind($"Night Vision - {profileName}","Tube Type",newTubeType);
             tubeType.SettingChanged += (sender, args) =>
             {
-                // UpdateCurrentProfile();
+               
                 
                 
                 
