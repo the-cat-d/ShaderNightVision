@@ -5,7 +5,7 @@ using System;
 
 namespace ShaderNightVision;
 
-[BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
+[BepInPlugin(PluginInfo.PluginGUID, PluginInfo.PluginName, PluginInfo.PluginVersion)]
 public class Plugin : BaseUnityPlugin
 {
     internal static new ManualLogSource Logger;
@@ -16,15 +16,15 @@ public class Plugin : BaseUnityPlugin
     {
         // Plugin startup logic
         Logger = base.Logger;
-        Logger.LogInfo($"Plugin {MyPluginInfo.PLUGIN_GUID} is loading");
+        Logger.LogInfo($"Plugin {PluginInfo.PluginName} is loading");
 
-        _harmony = new Harmony(MyPluginInfo.PLUGIN_GUID);
+        _harmony = new Harmony(PluginInfo.PluginGUID);
         _harmony.PatchAll();
         
         AssetBundleUtil.LoadAssetBundle("shadernv");
         
         PluginConfig.BindAll(Config);
-
+        
     }
 
     private void Update()
