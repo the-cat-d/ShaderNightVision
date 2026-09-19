@@ -4,8 +4,16 @@ namespace ShaderNightVision
     {
         Mono,
         Double,
-        Quad
-        // TODO: add Fullscreen
+        Quad,
+        Fullscreen 
             
     }
+
+    public enum NoiseBlendingMode
+    {
+        Subtractive = 1,
+        Additive = 0,
+        Multiply = 2,
+    }
+    
 }

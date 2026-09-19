@@ -16,12 +16,20 @@ namespace ShaderNightVision
         
         private static readonly int _nvIntensity = Shader.PropertyToID("_NVIntensity");
         private static readonly int _nvColor = Shader.PropertyToID("_ColorTint");
+        
+        private static readonly int _pixelate = Shader.PropertyToID("_Pixelate");
         private static readonly int _nvResolution = Shader.PropertyToID("_Resolution");
-
+        
+        
+        private static readonly int _noiseEnabled = Shader.PropertyToID("_Noise");
         private static readonly int _noiseIntensity = Shader.PropertyToID("_NoiseIntensity");
         private static readonly int _noiseFPS = Shader.PropertyToID("_NoiseFPS");
         private static readonly int _noiseScale = Shader.PropertyToID("_NoiseScale");
+        private static readonly int _noiseBlending = Shader.PropertyToID("_NoiseBlendingMode");
         
+        private static readonly int _distortionEnabled = Shader.PropertyToID("_Distortion");
+        private static readonly int _distortionStrength = Shader.PropertyToID("_DistortionStrength");
+        private static readonly int _distortionPower = Shader.PropertyToID("_DistortionPower");
         
         public static void Initialize([CanBeNull] CombatHUD _hud = null)
         {
@@ -31,46 +39,74 @@ namespace ShaderNightVision
             
             CombatHUD HUD = CombatHUD.i ?? _hud;
             
+            if (HUD is null || Camera.main is null) return;
+            
             Camera.main.gameObject.AddComponent<CameraHook>();
 
             
             switch (PluginConfig.currentProfile.tubeType.Value)
             {
                 case NVTubeType.Mono:
-                    NVGGameObject = GameObject.Instantiate(AssetBundleUtil.GetAsset<GameObject>("NVG1M"));
+                    NVGGameObject = Object.Instantiate(AssetBundleUtil.GetAsset<GameObject>("NVG1M"));
                     break;
                 case NVTubeType.Double:
-                    NVGGameObject = GameObject.Instantiate(AssetBundleUtil.GetAsset<GameObject>("NVG1"));
+                    NVGGameObject = Object.Instantiate(AssetBundleUtil.GetAsset<GameObject>("NVG1"));
                     break;
                 case NVTubeType.Quad:
-                    NVGGameObject = GameObject.Instantiate(AssetBundleUtil.GetAsset<GameObject>("NVG3"));
+                    NVGGameObject = Object.Instantiate(AssetBundleUtil.GetAsset<GameObject>("NVG3"));
                     break;
+                case NVTubeType.Fullscreen:
+                    NVGGameObject = new GameObject("NVGF");
+                    Image nvgImage = NVGGameObject.AddComponent<Image>();
+                    nvgImage.material = AssetBundleUtil.GetAsset<Material>("UINVG");
+                    NVGMaterial = nvgImage.material;
+                    RectTransform rect = NVGGameObject.GetComponent<RectTransform>();
+                    rect.anchorMin = Vector2.zero;
+                    rect.anchorMax = Vector2.one;
+                    
+                    rect.sizeDelta = Vector2.zero;
+                    
+                    break;
+                    
                 default:
-                    NVGGameObject = GameObject.Instantiate(AssetBundleUtil.GetAsset<GameObject>("NVG1"));
+                    NVGGameObject = Object.Instantiate(AssetBundleUtil.GetAsset<GameObject>("NVG1"));
                     break;
             }
             Plugin.Logger.LogInfo(HUD is null); 
             
-            NVGGameObject.transform.SetParent(HUD.transform,true);
+            NVGGameObject.transform.SetParent(HUD.transform,false);
             NVGGameObject.transform.localPosition = Vector3.zero;
             NVGGameObject.transform.SetAsFirstSibling();
             NVGGameObject.SetActive(NightVision.i != null && NightVision.i.nightVisSelected);
 
             
-            GameObject mask = NVGGameObject.transform.Find("NVGMask").gameObject;
-            NVGMaterial = mask.GetComponent<Image>().material;
+            
+            Transform mask = NVGGameObject.transform.Find("NVGMask");
+            if (mask) NVGMaterial = mask.GetComponent<Image>().material;
 
             currentPhase = 0;
-          
             
             ChangeGain(false);
+            
             UpdateScale();
             UpdatePosition();
+            
             UpdateColor();
-            UpdateResolution();
+
             UpdateNoiseIntensity();
             UpdateNoiseFPS();
             UpdateNoiseScale();
+            ToggleNoise();
+            UpdateNoiseBlending();
+            
+            TogglePixelation();
+            UpdateResolution();
+
+
+            ToggleDistortion();
+            UpdateDistortionStrength();
+            UpdateDistortionPower();
+            
         }
 
         // ---
@@ -90,14 +126,27 @@ namespace ShaderNightVision
             
             NVGMaterial.SetFloat(_nvIntensity, intensity);
             UpdateNoiseIntensity();
-            Plugin.Logger.LogInfo(NVGHandler.NVGMaterial.GetFloat(NVGHandler._nvIntensity));
+            
         }
 
         public static void UpdateColor()
         {
             NVGMaterial.SetColor(_nvColor, PluginConfig.currentProfile.nvColor.Value);
         }
-
+        
+        public static void ToggleNoise()
+        {
+            
+            float enabled = PluginConfig.currentProfile.noiseEnabled.Value? 1 : 0;
+            NVGMaterial.SetFloat(_noiseEnabled, enabled);
+        }
+        
+        public static void TogglePixelation()
+        {
+            float enabled = PluginConfig.currentProfile.nvPixelate.Value ? 1 : 0;
+            NVGMaterial.SetFloat(_pixelate, enabled);
+        }
+        
         public static void UpdateResolution()
         {
             NVGMaterial.SetFloat(_nvResolution, PluginConfig.currentProfile.nvResolution.Value);
@@ -117,7 +166,7 @@ namespace ShaderNightVision
         public static void UpdateNoiseScale()
         {
             NVGMaterial.SetFloat(_noiseScale, PluginConfig.currentProfile.noiseScale.Value);
-            Plugin.Logger.LogInfo(NVGHandler.NVGMaterial.GetFloat(_noiseScale));
+            
         }
         
         public static void UpdateNoiseFPS()
@@ -125,8 +174,34 @@ namespace ShaderNightVision
             NVGMaterial.SetFloat(_noiseFPS, PluginConfig.currentProfile.noiseFPS.Value);
         }
 
+        public static void UpdateNoiseBlending()
+        {
+            
+            NVGMaterial.SetFloat(_noiseBlending, (int)PluginConfig.currentProfile.noiseBlending.Value);
+        }
+        
+        public static void ToggleDistortion()
+        {
+            float enabled = PluginConfig.currentProfile.distortionEnabled.Value ? 1 : 0;
+            NVGMaterial.SetFloat(_distortionEnabled, enabled);
+        }
+
+        
+        public static void UpdateDistortionStrength()
+        {
+            NVGMaterial.SetFloat(_distortionStrength, PluginConfig.currentProfile.distortionStrength.Value);
+        }
+        
+        public static void UpdateDistortionPower()
+        {
+            NVGMaterial.SetFloat(_distortionPower, PluginConfig.currentProfile.distortionPower.Value);
+        }
+
+        
         public static void UpdateScale()
         {
+            if (PluginConfig.currentProfile.tubeType.Value == NVTubeType.Fullscreen) return;   
+            
             float scale = PluginConfig.currentProfile.nvScale.Value;
             
             NVGGameObject.transform.localScale = new Vector3(scale,scale);
@@ -134,6 +209,8 @@ namespace ShaderNightVision
         
         public static void UpdatePosition()
         {
+            if (PluginConfig.currentProfile.tubeType.Value == NVTubeType.Fullscreen) return;
+            
             NVGGameObject.transform.localPosition = PluginConfig.currentProfile.nvPosition.Value;
         }
         

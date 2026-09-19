@@ -1,4 +1,5 @@
 using HarmonyLib;
+using System;
 
 namespace ShaderNightVision
 {
@@ -13,14 +14,31 @@ namespace ShaderNightVision
             [HarmonyPrefix]
             public static void Init(CombatHUD __instance)
             {
-                
-                NVGHandler.Initialize(__instance);
-                
+
+                try
+                {
+                    NVGHandler.Initialize(__instance);
+
+                }
+                catch (Exception e)
+                {
+                    Plugin.Logger.LogError(e.ToString());
+                }
             }
         }
 
         class  NVGPatches
         {
+            [HarmonyPatch(typeof(NightVision), "NightVis_OnSwitchCam")]
+            class NVGInitPatch
+            {
+                [HarmonyPostfix]
+                static void Init(NightVision __instance)
+                {
+                    NVGHandler.NVGGameObject.SetActive(NightVision.i.nightVisSelected);
+                }
+            }
+            
             [HarmonyPatch(typeof(NightVision), "Toggle")]
             class NVGTogglePatch
             {
@@ -28,7 +46,7 @@ namespace ShaderNightVision
                 public static void Toggle(NightVision __instance)
                 {
                     if (NVGHandler.NVGGameObject is null) return;
-                    
+                    Plugin.Logger.LogDebug($"setting nv to {NightVision.i.nightVisSelected}");
                     NVGHandler.NVGGameObject.SetActive(NightVision.i.nightVisSelected);
                 }
             }
