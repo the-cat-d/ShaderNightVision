@@ -4,6 +4,6 @@ namespace ShaderNightVision
     {
         public const string PluginName = "ShaderNightVision";
         public const string PluginGUID = "byt0rpilot.ShaderNightVision";
-        public const string PluginVersion = "1.0.0";
+        public const string PluginVersion = "1.1.0";
     }
 }
