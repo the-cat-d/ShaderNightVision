@@ -40,6 +40,9 @@
       <Reference Include="ConfigurationManager">
         <HintPath>Assemblies\ConfigurationManager.dll</HintPath>
       </Reference>
+      <Reference Include="Mirage">
+        <HintPath>Assemblies\Mirage.dll</HintPath>
+      </Reference>
       <Reference Include="Rewired_Core">
         <HintPath>Assemblies\Rewired_Core.dll</HintPath>
       </Reference>
@@ -90,6 +93,10 @@
     <ItemGroup>
       <None Remove="EmbeddedResources\shadernv" />
       <EmbeddedResource Include="EmbeddedResources\shadernv" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Assets\icon\" />
     </ItemGroup>
 
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">

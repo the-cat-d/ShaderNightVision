@@ -5,29 +5,30 @@ namespace ShaderNightVision.MonoBehaviour
 {
    public class CameraHook : UnityEngine.MonoBehaviour
     {
-        private Camera baseCamera;
-        private Camera cockpitRendererCam;
+        private Camera BaseCamera;
+        private Camera CockpitRendererCam;
         
-        private RenderTexture finalRenderTexture;
+        private RenderTexture FinalRenderTexture;
         
-        private CommandBuffer blitCmd;
+        private CommandBuffer BlitCmd;
+        
+        private static readonly int _globalTexture = Shader.PropertyToID( "_CustomBGTex");
 
-
-        private readonly string globalTextureName = "_CustomBGTex";
+    
 
         void Awake()
         {
-            baseCamera = GetComponent<Camera>();
-            if (baseCamera == null) return;
+            BaseCamera = GetComponent<Camera>();
+            if (BaseCamera == null) return;
             
             
-            finalRenderTexture = new RenderTexture(Screen.width, Screen.height, 0, RenderTextureFormat.ARGB32);
-            finalRenderTexture.filterMode = FilterMode.Bilinear;
-            finalRenderTexture.wrapMode = TextureWrapMode.Clamp;
-            finalRenderTexture.Create();
+            FinalRenderTexture = new RenderTexture(Screen.width, Screen.height, 0, RenderTextureFormat.ARGB32);
+            FinalRenderTexture.filterMode = FilterMode.Bilinear;
+            FinalRenderTexture.wrapMode = TextureWrapMode.Clamp;
+            FinalRenderTexture.Create();
 
-            blitCmd = new CommandBuffer { name = "ShaderNV_GrabPass" };
-            Shader.SetGlobalTexture(globalTextureName, finalRenderTexture);
+            BlitCmd = new CommandBuffer { name = "ShaderNV_GrabPass" };
+            Shader.SetGlobalTexture(_globalTexture, FinalRenderTexture);
 
             
             RenderPipelineManager.endCameraRendering += OnEndCameraRendering;
@@ -35,54 +36,56 @@ namespace ShaderNightVision.MonoBehaviour
 
         void OnEndCameraRendering(ScriptableRenderContext context, Camera camera)
         {
-           
-            if (cockpitRendererCam == null)
+            
+            if (CockpitRendererCam == null)
             {
                 GameObject camObj = GameObject.Find("cockpitRenderer");
                 if (camObj != null)
                 {
-                    cockpitRendererCam = camObj.GetComponent<Camera>();
+                    CockpitRendererCam = camObj.GetComponent<Camera>();
                 }
             }
 
             
-            Camera currentTarget = (cockpitRendererCam != null) ? cockpitRendererCam : baseCamera;
+            Camera currentTarget = (CockpitRendererCam != null &&  CameraStateManager.cameraMode == CameraMode.cockpit) ? CockpitRendererCam : BaseCamera;
 
             if (camera != currentTarget) return;
 
-            blitCmd.Clear();
+            BlitCmd.Clear();
             
             
             if (currentTarget.activeTexture != null)
             {
-                blitCmd.Blit(currentTarget.activeTexture, finalRenderTexture);
+                BlitCmd.Blit(currentTarget.activeTexture, FinalRenderTexture);
             }
-            else if (baseCamera.activeTexture != null)
+            else if (BaseCamera.activeTexture != null)
             {
-                blitCmd.Blit(baseCamera.activeTexture, finalRenderTexture);
+                BlitCmd.Blit(BaseCamera.activeTexture, FinalRenderTexture);
             }
             else
             {
                 // Fallback
                 RenderTargetIdentifier activeBuffer = BuiltinRenderTextureType.CurrentActive;
-                blitCmd.Blit(activeBuffer, finalRenderTexture);
+                BlitCmd.Blit(activeBuffer, FinalRenderTexture);
             }
-
             
-            blitCmd.SetGlobalTexture(globalTextureName, finalRenderTexture);
-            context.ExecuteCommandBuffer(blitCmd);
+            BlitCmd.SetGlobalTexture(_globalTexture, FinalRenderTexture);
+            context.ExecuteCommandBuffer(BlitCmd);
             context.Submit();
         }
 
         void OnDestroy()
         {
+            
+            Plugin.logger.LogDebug("Camera hook destroyed");
+            
             RenderPipelineManager.endCameraRendering -= OnEndCameraRendering;
 
-            blitCmd?.Release();
-            if (finalRenderTexture != null)
+            BlitCmd?.Release();
+            if (FinalRenderTexture != null)
             {
-                finalRenderTexture.Release();
-                Destroy(finalRenderTexture);
+                FinalRenderTexture.Release();
+                Destroy(FinalRenderTexture);
             }
         }
     }

@@ -5,28 +5,7 @@ namespace ShaderNightVision
 {
     public class NVPatches
     {
-
         
-        
-        [HarmonyPatch(typeof(CombatHUD), "Awake")]
-        class HUDPatch
-        {
-            [HarmonyPrefix]
-            public static void Init(CombatHUD __instance)
-            {
-
-                try
-                {
-                    NVGHandler.Initialize(__instance);
-
-                }
-                catch (Exception e)
-                {
-                    Plugin.Logger.LogError(e.ToString());
-                }
-            }
-        }
-
         class  NVGPatches
         {
             [HarmonyPatch(typeof(NightVision), "NightVis_OnSwitchCam")]
@@ -35,7 +14,7 @@ namespace ShaderNightVision
                 [HarmonyPostfix]
                 static void Init(NightVision __instance)
                 {
-                    NVGHandler.NVGGameObject.SetActive(NightVision.i.nightVisSelected);
+                    NVGHandler.nvgGameObject.SetActive(NightVision.i.nightVisSelected);
                 }
             }
             
@@ -45,9 +24,9 @@ namespace ShaderNightVision
                 [HarmonyPostfix]
                 public static void Toggle(NightVision __instance)
                 {
-                    if (NVGHandler.NVGGameObject is null) return;
-                    Plugin.Logger.LogDebug($"setting nv to {NightVision.i.nightVisSelected}");
-                    NVGHandler.NVGGameObject.SetActive(NightVision.i.nightVisSelected);
+                    if (NVGHandler.nvgGameObject is null) return;
+                    Plugin.logger.LogDebug($"setting nv to {NightVision.i.nightVisSelected}");
+                    NVGHandler.nvgGameObject.SetActive(NightVision.i.nightVisSelected);
                 }
             }
             
@@ -66,5 +45,62 @@ namespace ShaderNightVision
             }
         }
         
+        
+        [HarmonyPatch(typeof(CombatHUD), "Awake")]
+        class HUDPatch
+        {
+            [HarmonyPrefix]
+            public static void Init(CombatHUD __instance)
+            {
+
+                try
+                {
+                    NVGHandler.InitializeCanvas(__instance);
+                    
+                }
+                catch (Exception e)
+                {
+                    Plugin.logger.LogError(e.ToString());
+                }
+            }
+        }
+        
+        [HarmonyPatch(typeof(Aircraft), "OnStartClient")]
+        class AircraftInitPatch
+        {
+            [HarmonyPostfix]
+            public static void Init(Aircraft __instance)
+            {
+                Plugin.logger.LogInfo(__instance);
+                
+                
+                
+                if (__instance != SceneSingleton<CombatHUD>.i.aircraft || !PluginConfig.aircraftProfiles.Value) return;
+                
+                Plugin.logger.LogInfo(__instance.definition.unitName);
+                PluginConfig.BindAircraftProfile(__instance.definition.unitName);
+            }
+        }
+        
+        [HarmonyPatch(typeof(CameraStateManager), "SwitchState")]
+        class CameraStateSwitchPatch
+        {
+            [HarmonyPostfix]
+            public static void Init(CameraStateManager __instance)
+            {
+                Plugin.logger.LogInfo(CameraStateManager.cameraMode);
+
+                if (CameraStateManager.cameraMode == CameraMode.cockpit)
+                {
+                    NVGHandler.InitializeNVG();
+                }
+                else
+                {
+                    NVGHandler.InitializeNVG(NVTubeType.Fullscreen);
+                }
+
+            }
+        }
+
     }
 }

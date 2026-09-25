@@ -1,25 +1,24 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
-using System;
 
 namespace ShaderNightVision;
 
 [BepInPlugin(PluginInfo.PluginGUID, PluginInfo.PluginName, PluginInfo.PluginVersion)]
 public class Plugin : BaseUnityPlugin
 {
-    internal static new ManualLogSource Logger;
+    internal static new ManualLogSource logger;
 
-    private static Harmony _harmony;
+    private static Harmony harmony;
     
     private void Awake()
     {
         // Plugin startup logic
-        Logger = base.Logger;
-        Logger.LogInfo($"Plugin {PluginInfo.PluginName} is loading");
+        logger = base.Logger;
+        logger.LogInfo($"Plugin {PluginInfo.PluginName} is loading");
 
-        _harmony = new Harmony(PluginInfo.PluginGUID);
-        _harmony.PatchAll();
+        harmony = new Harmony(PluginInfo.PluginGUID);
+        harmony.PatchAll();
         
         AssetBundleUtil.LoadAssetBundle("shadernv");
         
@@ -30,6 +29,8 @@ public class Plugin : BaseUnityPlugin
     private void Update()
     {
         NVGHandler.NVGUpdate();
+        
+        
     }
 
 }

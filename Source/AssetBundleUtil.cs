@@ -1,5 +1,4 @@
 using JetBrains.Annotations;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -31,7 +30,7 @@ namespace ShaderNightVision
             {
                 if (stream == null)
                 {
-                    Plugin.Logger.LogError($"Assetbundle \"{assetBundleName}\" not found ({resourceName})");
+                    Plugin.logger.LogError($"Assetbundle \"{assetBundleName}\" not found ({resourceName})");
                     return null;
                 }
                 bundleBytes = new byte[stream.Length];
@@ -42,7 +41,7 @@ namespace ShaderNightVision
 
             if (loadedAssetBundle == null)
             {
-                Plugin.Logger.LogError("Unable to load Assetbundle");
+                Plugin.logger.LogError("Unable to load Assetbundle");
                 return null;
             }
             
@@ -55,10 +54,10 @@ namespace ShaderNightVision
             
             foreach (string name in  assetBundle.GetAllAssetNames())
             {
-                Plugin.Logger.LogDebug(name);
+                Plugin.logger.LogDebug(name);
             }
 
-            Plugin.Logger.LogInfo($"Assetbundle loaded with {assetBundle.name.Length} asset(s)");
+            Plugin.logger.LogInfo($"Assetbundle loaded with {assetBundle.name.Length} asset(s)");
 
          
             return loadedAssetBundle;
@@ -72,7 +71,7 @@ namespace ShaderNightVision
         {
             if (assetBundle == null)
             {
-                Plugin.Logger.LogError("Assetbundle not found");
+                Plugin.logger.LogError("Assetbundle not found");
                 return null;
             }
             
@@ -80,7 +79,7 @@ namespace ShaderNightVision
 
             if (cachedAssets.TryGetValue(assetName, out Object cachedAsset))
             {
-                Plugin.Logger.LogInfo($"Asset \"{assetName}\" found in cache");
+                Plugin.logger.LogInfo($"Asset \"{assetName}\" found in cache");
                 asset = (T)cachedAsset;
                 
             }
@@ -88,16 +87,16 @@ namespace ShaderNightVision
             { 
                 asset = assetBundle.LoadAsset<T>(assetName);
                 cachedAssets.Add(assetName, asset);
-                Plugin.Logger.LogInfo($"Asset \"{assetName}\" cached");
+                Plugin.logger.LogInfo($"Asset \"{assetName}\" cached");
             }
             
             if (asset == null)
             {
-                Plugin.Logger.LogError($"Asset \"{assetName}\" not found");
+                Plugin.logger.LogError($"Asset \"{assetName}\" not found");
                 return null;
             }
 
-            Plugin.Logger.LogInfo($"Asset \"{assetName}\" found");
+            Plugin.logger.LogInfo($"Asset \"{assetName}\" found");
             
             return asset;
         }
