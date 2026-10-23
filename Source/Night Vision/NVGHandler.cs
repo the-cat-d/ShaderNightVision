@@ -58,6 +58,11 @@ namespace ShaderNightVision
             
             nvgCanvas.transform.SetAsFirstSibling();
             
+            // i ufcking hate unity
+            
+            nvgCanvas.SetActive(false);
+            nvgCanvas.SetActive(true);
+            
             InitializeNVG();
 
         }
