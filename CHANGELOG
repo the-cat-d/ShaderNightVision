@@ -1,0 +1,8 @@
+
+v1.1.2
+- Fixed game breaking bug where exiting and entering a mission while having fullscreen NVGs could cause it to break
+- Fixed NVG gain resetting when switching camera stances
+- Added option toggle forcing fullscreen NVGS when out of 1st person
+- Slightly improved logging
+
+im too lazy to write down changes for previous versions

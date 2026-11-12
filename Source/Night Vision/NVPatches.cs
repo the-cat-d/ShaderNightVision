@@ -3,17 +3,23 @@ using System;
 
 namespace ShaderNightVision
 {
-    public class NVPatches
+    public static class NVPatches
     {
-        
-        class  NVGPatches
+
+        private static class NVGPatches
         {
             [HarmonyPatch(typeof(NightVision), "NightVis_OnSwitchCam")]
             class NVGInitPatch
             {
                 [HarmonyPostfix]
-                static void Init(NightVision __instance)
+                static void NVGCamSwitch(NightVision __instance)
                 {
+                    Plugin.logger.LogWarning(NVGHandler.nvgGameObject);
+                    if (!NVGHandler.nvgGameObject)
+                    {
+                        NVGHandler.InitializeNVGObject(force: true);
+                        return;
+                    };
                     NVGHandler.nvgGameObject.SetActive(NightVision.i.nightVisSelected);
                 }
             }
@@ -22,9 +28,13 @@ namespace ShaderNightVision
             class NVGTogglePatch
             {
                 [HarmonyPostfix]
-                public static void Toggle(NightVision __instance)
+                public static void NVGToggle(NightVision __instance)
                 {
-                    if (NVGHandler.nvgGameObject is null) return;
+                    if (!NVGHandler.nvgGameObject)
+                    {
+                        NVGHandler.InitializeNVGObject(force: true);
+                        return;
+                    }
                     Plugin.logger.LogDebug($"setting nv to {NightVision.i.nightVisSelected}");
                     NVGHandler.nvgGameObject.SetActive(NightVision.i.nightVisSelected);
                 }
@@ -34,7 +44,7 @@ namespace ShaderNightVision
             class NVGUpdatePatch
             {
                 [HarmonyPrefix]
-                public static bool Update(NightVision __instance)
+                public static bool NVGUpdate(NightVision __instance)
                 {
                     if (GameManager.playerInput.GetButtonDown("Night Vis"))
                     {
@@ -50,7 +60,7 @@ namespace ShaderNightVision
         class HUDPatch
         {
             [HarmonyPrefix]
-            public static void Init(CombatHUD __instance)
+            public static void NVGHUDInit(CombatHUD __instance)
             {
 
                 try
@@ -69,15 +79,12 @@ namespace ShaderNightVision
         class AircraftInitPatch
         {
             [HarmonyPostfix]
-            public static void Init(Aircraft __instance)
+            public static void BindProfile(Aircraft __instance)
             {
-                Plugin.logger.LogInfo(__instance);
-                
-                
                 
                 if (__instance != SceneSingleton<CombatHUD>.i.aircraft || !PluginConfig.aircraftProfiles.Value) return;
                 
-                Plugin.logger.LogInfo(__instance.definition.unitName);
+                
                 PluginConfig.BindAircraftProfile(__instance.definition.unitName);
             }
         }
@@ -86,17 +93,16 @@ namespace ShaderNightVision
         class CameraStateSwitchPatch
         {
             [HarmonyPostfix]
-            public static void Init(CameraStateManager __instance)
+            public static void OnCamStateSwitch(CameraStateManager __instance)
             {
-                Plugin.logger.LogInfo(CameraStateManager.cameraMode);
 
                 if (CameraStateManager.cameraMode == CameraMode.cockpit)
                 {
-                    NVGHandler.InitializeNVG();
+                    NVGHandler.InitializeNVGObject();
                 }
-                else
+                else if (PluginConfig.fullscreenOnCamSwitch.Value)
                 {
-                    NVGHandler.InitializeNVG(NVTubeType.Fullscreen);
+                    NVGHandler.InitializeNVGObject(NVTubeType.Fullscreen);
                 }
 
             }

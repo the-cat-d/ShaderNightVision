@@ -19,7 +19,7 @@ namespace ShaderNightVision.MonoBehaviour
         void Awake()
         {
             BaseCamera = GetComponent<Camera>();
-            if (BaseCamera == null) return;
+            if (!BaseCamera) return;
             
             
             FinalRenderTexture = new RenderTexture(Screen.width, Screen.height, 0, RenderTextureFormat.ARGB32);

@@ -54,11 +54,7 @@ namespace ShaderNightVision
                 ProfileName = $" ({profileName})";
             }
 
-
-
-            
-            
-            Plugin.logger.LogDebug($"Creating profile {this.ProfileName}");
+            Plugin.logger.LogDebug($"Creating NVG profile... {ProfileName}");
             
             // General
 
@@ -71,7 +67,7 @@ namespace ShaderNightVision
 
                 NVGHandler.nvgMaterial = null;
                 Object.Destroy(NVGHandler.nvgGameObject);
-                NVGHandler.InitializeNVG();
+                NVGHandler.InitializeNVGObject();
 
             };
 

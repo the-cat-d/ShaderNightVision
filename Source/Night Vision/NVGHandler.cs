@@ -37,7 +37,7 @@ namespace ShaderNightVision
 
         public static void InitializeCanvas([CanBeNull] CombatHUD hudBackup = null)
         {
-            Plugin.logger.LogInfo("Initializing NVGCanvas");
+            Plugin.logger.LogInfo("Initializing NVG Canvas...");
             
             CombatHUD hud = CombatHUD.i ?? hudBackup;
             
@@ -63,27 +63,24 @@ namespace ShaderNightVision
             nvgCanvas.SetActive(false);
             nvgCanvas.SetActive(true);
             
-            InitializeNVG();
+            Plugin.logger.LogInfo("NVG Canvas Initialized");
+            
+            InitializeNVGObject();
 
         }
 
-        public static void InitializeNVG(NVTubeType? tubeOverride = null)
+        public static void InitializeNVGObject(NVTubeType? tubeOverride = null,bool force = false)
         {
             
-            Plugin.logger.LogInfo("Initializing NVG");
+            Plugin.logger.LogInfo($"Initializing NVG Object... (Type: {PluginConfig.currentProfile.TubeType.Value}, Override: {tubeOverride}), Force: {force}");
             
             if (Camera.main is null) return;
-
-
-           
             
             
             NVTubeType currentTubeType = tubeOverride ?? PluginConfig.currentProfile.TubeType.Value;
             
-            
-            Plugin.logger.LogInfo($"t: {currentTubeType} o: {tubeOverride}");
 
-            if (lastTubeType == currentTubeType)
+            if (lastTubeType == currentTubeType && !force)
             {
                 return;
             }
@@ -129,15 +126,17 @@ namespace ShaderNightVision
             Transform mask = nvgGameObject.transform.Find("NVGMask");
             if (mask) nvgMaterial = mask.GetComponent<Image>().material;
 
-            Plugin.logger.LogInfo(nvgMaterial);
+           
             lastTubeType = currentTubeType;
             
             
             
-            ChangeGain(false);
+            ChangeGain();
 
 
             UpdateNVGMaterial();
+            
+            Plugin.logger.LogInfo($"NVG Object Initialized ({currentTubeType})");
         }
 
         
@@ -146,7 +145,7 @@ namespace ShaderNightVision
         
         public static void UpdateNVGMaterial()
         {
-            if (nvgMaterial is null) return;
+            if (!nvgMaterial) return;
             
             UpdateScale(); 
             UpdatePosition();
@@ -173,13 +172,17 @@ namespace ShaderNightVision
 
         public static int currentPhase;
         
-        private static void ChangeGain(bool direction)
+        private static void ChangeGain(bool? direction = null)
         {
             int gainPhases = PluginConfig.currentProfile.NvGainPhases.Value;
             float gainMin = PluginConfig.currentProfile.NvGainMin.Value;
             float gainMax = PluginConfig.currentProfile.NvGainMax.Value;
-            
-            currentPhase += direction ? -1 : 1;
+
+            if (direction.HasValue)
+            {
+                currentPhase += (bool)direction ? -1 : 1;
+                
+            }
             currentPhase = Mathf.Clamp(currentPhase, 0, gainPhases);
             
             float intensity = Mathf.Lerp(gainMin, gainMax, (float)currentPhase / gainPhases);

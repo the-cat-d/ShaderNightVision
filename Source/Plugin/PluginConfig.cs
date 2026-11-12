@@ -15,7 +15,7 @@ namespace ShaderNightVision
         public static ConfigEntry<KeyCode> nvGainDecreaseKey;
       
         public static ConfigEntry<bool> aircraftProfiles;
-        
+        public static ConfigEntry<bool> fullscreenOnCamSwitch;
         
         private static NVGProfile defaultProfile;
         private static NVGProfile aircraftProfile;
@@ -35,7 +35,7 @@ namespace ShaderNightVision
 
 
             aircraftProfiles = config.Bind("Night Vision - Profiles", "Enable Aircraft Specific Profiles", false);
-            aircraftProfiles.SettingChanged += (sender, args) =>
+            aircraftProfiles.SettingChanged += (_, _) =>
             {
                 if (aircraftProfiles.Value)
                 {
@@ -49,6 +49,9 @@ namespace ShaderNightVision
                 
                 
             };
+            
+            fullscreenOnCamSwitch = config.Bind("Night Vision - Misc", "Fullscreen NVG When Outside of Cockpit", true,"Switches to the fullscreen tube type when you aren't inside the cockpit (e.g in map freecam or 3rd person).");
+            
 
             if (aircraftProfiles.Value)
             {
@@ -105,12 +108,10 @@ namespace ShaderNightVision
         
         public static void BindAircraftProfile(string aircraftName)
         {
-            
+            Plugin.logger.LogInfo($"Binding Profile... ({aircraftName})");
             
             defaultProfile?.ToggleEntries(false);
             aircraftProfile?.ToggleEntries(false);
-            
-            Plugin.logger.LogInfo(aircraftName);
             
 
             aircraftProfile = NVGProfile.CreateAircraftProfile(config,aircraftName);
@@ -118,6 +119,8 @@ namespace ShaderNightVision
      
             aircraftProfile.ToggleEntries(true);
             NVGHandler.UpdateNVGMaterial();
+            
+            Plugin.logger.LogInfo($"Profile Binded ({aircraftName})");
             
         }
 
