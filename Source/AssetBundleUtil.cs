@@ -12,9 +12,10 @@ namespace ShaderNightVision
     
     public static class AssetBundleUtil
     {
-        
-        
-        public static AssetBundle assetBundle;
+
+
+        private static AssetBundle assetBundle;
+        private static string lastAssetBundleName;
         
         [CanBeNull]
         public static AssetBundle LoadAssetBundle(string assetBundleName)
@@ -23,7 +24,7 @@ namespace ShaderNightVision
             
             string resourceName = $"{nameof(ShaderNightVision)}.EmbeddedResources.{assetBundleName}";
 
-            
+            lastAssetBundleName = assetBundleName;
             
             byte[] bundleBytes;
             using (Stream stream = assembly.GetManifestResourceStream(resourceName))
@@ -71,8 +72,13 @@ namespace ShaderNightVision
         {
             if (assetBundle == null)
             {
-                Plugin.logger.LogError("Assetbundle not found");
-                return null;
+                Plugin.logger.LogWarning("Assetbundle not found, trying to reload...");
+                LoadAssetBundle(lastAssetBundleName);
+                if (assetBundle == null)
+                {
+                    Plugin.logger.LogError("Assetbundle not found");
+                    return null;
+                }
             }
             
             T asset;
