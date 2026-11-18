@@ -79,6 +79,12 @@
       <Reference Include="UnityEngine.CoreModule">
         <HintPath>Assemblies\UnityEngine.CoreModule.dll</HintPath>
       </Reference>
+      <Reference Include="UnityEngine.ImageConversionModule">
+        <HintPath>Assemblies\UnityEngine.ImageConversionModule.dll</HintPath>
+      </Reference>
+      <Reference Include="UnityEngine.IMGUIModule">
+        <HintPath>Assemblies\UnityEngine.IMGUIModule.dll</HintPath>
+      </Reference>
       <Reference Include="UnityEngine.InputLegacyModule">
         <HintPath>Assemblies\UnityEngine.InputLegacyModule.dll</HintPath>
       </Reference>

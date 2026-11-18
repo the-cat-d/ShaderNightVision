@@ -111,6 +111,25 @@ namespace ShaderNightVision
                     
                     break;
                     
+                case NVTubeType.Custom:
+                    Sprite customNVGSprite = NVTubes.GetCustomTubeSprite();
+                    if (!customNVGSprite)
+                    {
+                        nvgGameObject = Object.Instantiate(AssetBundleUtil.GetAsset<GameObject>("NVG1"));
+                        
+                        break;
+                    };
+                    nvgGameObject = new GameObject("NVGC");
+                    Image customNVGImage = nvgGameObject.AddComponent<Image>();
+                    customNVGImage.material = AssetBundleUtil.GetAsset<Material>("UINVG");
+                    customNVGImage.sprite = customNVGSprite;
+                    nvgMaterial = customNVGImage.material;
+                    RectTransform customRect = nvgGameObject.GetComponent<RectTransform>();
+                    // rect.anchorMin = Vector2.zero;
+                    // rect.anchorMax = Vector2.one;
+                    
+                    // rect.sizeDelta = Vector2.zero;
+                    break;
                 default:
                     nvgGameObject = Object.Instantiate(AssetBundleUtil.GetAsset<GameObject>("NVG1"));
                     break;
